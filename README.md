@@ -32,3 +32,10 @@ If neither CUDA nor Apple MPS are available, it automatically falls back to CPU.
 
 I plan to include this in [noScribe](https://github.com/kaixxx/noScribe), my workhorse for automated offline interview transcription in my daytime job as a social scientist.
 If you're interested in my progress integrating this into noScribe, [check out my fork of Kai's noScribe](https://github.com/yjeanrenaud/noScribe/).
+
+## License and Citation
+
+This work is licensed under the PolyForm Noncommercial License. In short, this means, you are free to use and modify this, as long as you mention me and this repository. Any commercial use is not permitted without a separate agreement.
+
+If you use this software in (academic= work, please cite:
+Jeanrenaud, Yves (2026). *yj_qualAnonymiser*. https://github.com/yjeanrenaud/yj_qualAnonymiser/.
