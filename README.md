@@ -1,10 +1,10 @@
 # yj_qualAnonymiser
 
-A partial attempt to use NLP to classify word embeddings in texts—primarily narrative interviews from qualitative social sciences—to make meaningful suggestions for anonymisation / pseudonymisation.
+A partial attempt to use NLP to classify word embeddings in texts, primarily in narrative interviews from qualitative social sciences, to make meaningful suggestions for anonymisation / pseudonymisation. It runs completely locally and offline.
 
 ## Why?
 
-Pseudonymisation or anonymisation of *Personally Identifiable Information *(PII) is more than pure redaction. For social scientists like me, it is important to preserve certain information or categorical epistemological context while still protecting informants in empirical qualitative social science research.
+Pseudonymisation or anonymisation of *Personally Identifiable Information* (PII) is more than pure redaction. For social scientists like me, it is important to preserve certain information or categorical epistemological context while still protecting informants in empirical qualitative social science research.
 
 ## How?
 
