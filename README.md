@@ -13,6 +13,6 @@ I wanted to include as many languages as possible. The initial version of the Py
 ### (Optional) GPU acceleration:
 yj_piiMarker automatically uses CUDA GPU if available. It also uses Apple MPS if available (please, *help me testing* this! I currently lack the hardware)
 If neither CUDA nor Apple MPS are available, it automatically falls back to CPU. The later is obviously slow but still usable.
-
+## What for?
 I want to include this in [noScribe](https://github.com/kaixxx/noScribe), my work horse for automated offline interview transcription on my daytime job as a social scientist.
-If you're interested in my progress in implementing this noScribe, [check out my fork](https://github.com/yjeanrenaud/noScribe/)).
+If you're interested in my progress in implementing this noScribe, [check out my fork](https://github.com/yjeanrenaud/noScribe/).
