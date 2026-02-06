@@ -1,18 +1,34 @@
 # yj_qualAnonymiser
-A partical attempt to use NLP to classify word embeddings in texts, primarily narrative interview from qualitative social sciences, to make profound suggestions for anonymisation / pseudonymisation.
+
+A partial attempt to use NLP to classify word embeddings in texts—primarily narrative interviews from qualitative social sciences—to make meaningful suggestions for anonymisation / pseudonymisation.
+
 ## Why?
-Pseudonymisation or anonymsisation of Personal Identifiable Information (PII) is more than a pure redaction. At least for social scientists like I am one, it is important to preserve some information or categorial epistemological context while protecting informants of empirical qualitative social sciences.
+
+Pseudonymisation or anonymisation of *Personally Identifiable Information *(PII) is more than pure redaction. For social scientists like me, it is important to preserve certain information or categorical epistemological context while still protecting informants in empirical qualitative social science research.
+
 ## How?
-My goal is to provide a tool that suggests parts of texts, usually qualitative interview transcripts, that should draw your attention. 
-### NER and Word Emedding Similarity
-Currently, my focus is on avoiding per-device configuration at all. Hence, I use multilingualy  NER (pre-trained transformers for Name Entity Recognition) and word embedding similarity (sentence-transformers) to get behind the words' embeddings.
-### Regex and covabulary lists
-Furthermore, as net step, I alsouse traditional regex (for email/phone/etc.) and include optional custom vocabulary lists (CSV files in a subfolder).
+
+My goal is to provide a tool that suggests parts of texts—usually qualitative interview transcripts—that should draw your attention.
+
+### NER and Word Embedding Similarity
+
+Currently, my focus is on avoiding per-device configuration altogether. Therefore, I use multilingual NER (pre-trained transformers for Named Entity Recognition) and word embedding similarity (sentence-transformers) to capture semantic relationships behind words.
+
+### Regex and Vocabulary Lists
+
+As a next step, I also use traditional regex patterns (for email/phone/etc.) and include optional custom vocabulary lists (CSV files in a subfolder).
+
 ### Multilingual
-I wanted to include as many languages as possible. The initial version of the Python script I could test English, German, and French transcripts of on various details. It looks quite promising.
-### (Optional) GPU acceleration:
-yj_piiMarker automatically uses CUDA GPU if available. It also uses Apple MPS if available (please, *help me testing* this! I currently lack the hardware)
-If neither CUDA nor Apple MPS are available, it automatically falls back to CPU. The later is obviously slow but still usable.
+
+I aim to support as many languages as possible. With the initial version of the Python script, I tested English, German, and French transcripts across various cases, and results look promising. (*help me with testing further languages, too*)
+
+### (Optional) GPU Acceleration
+
+`yj_piiMarker` automatically uses a CUDA GPU if available. It also supports Apple MPS if available (*help with testing is appreciated*. I currently lack compatible hardware).
+
+If neither CUDA nor Apple MPS are available, it automatically falls back to CPU. The latter is slower but still usable.
+
 ## What for?
-I want to include this in [noScribe](https://github.com/kaixxx/noScribe), my work horse for automated offline interview transcription on my daytime job as a social scientist.
-If you're interested in my progress in implementing this noScribe, [check out my fork](https://github.com/yjeanrenaud/noScribe/).
+
+I plan to include this in [noScribe](https://github.com/kaixxx/noScribe), my workhorse for automated offline interview transcription in my daytime job as a social scientist.
+If you're interested in my progress integrating this into noScribe, check out my fork: https://github.com/yjeanrenaud/noScribe/
