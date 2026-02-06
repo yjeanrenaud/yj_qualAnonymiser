@@ -8,7 +8,7 @@ Pseudonymisation or anonymisation of *Personally Identifiable Information *(PII)
 
 ## How?
 
-My goal is to provide a tool that suggests parts of texts—usually qualitative interview transcripts—that should draw your attention.
+My goal is to provide a tool that suggests parts of texts, usually qualitative interview transcripts, that should draw your attention.
 
 ### NER and Word Embedding Similarity
 
@@ -31,4 +31,4 @@ If neither CUDA nor Apple MPS are available, it automatically falls back to CPU.
 ## What for?
 
 I plan to include this in [noScribe](https://github.com/kaixxx/noScribe), my workhorse for automated offline interview transcription in my daytime job as a social scientist.
-If you're interested in my progress integrating this into noScribe, check out my fork: https://github.com/yjeanrenaud/noScribe/
+If you're interested in my progress integrating this into noScribe, [check out my fork of Kai's noScribe](https://github.com/yjeanrenaud/noScribe/).
