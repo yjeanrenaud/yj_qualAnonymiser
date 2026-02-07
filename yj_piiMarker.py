@@ -36,6 +36,8 @@ pip install --index-url https://download.pytorch.org/whl/cu121 torch torchvision
 # CPU / Apple Silicon #
 pip install torchvision torchaudio
 
+# Intel NPU
+pip install -U "optimum-intel[openvino]" openvino
 
 # Custom Vocab CSV format #
 Create a folder like:
@@ -111,15 +113,23 @@ from sentence_transformers import SentenceTransformer
 # -------------------------------------------------
 def detect_device():
     if torch.cuda.is_available():
-        print("✓ Using CUDA GPU")
-        return 0, "cuda"
+        print("Using CUDA GPU")
+        return {"backend": "torch", "hf_device": 0, "st_device": "cuda"}
 
     if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
-        print("✓ Using Apple MPS acceleration")
-        return 0, "mps"
-
-    print("✓ Using CPU")
-    return -1, "cpu"
+        print("Using Apple MPS acceleration")
+        return {"backend": "torch", "hf_device": 0, "st_device": "mps"}
+   try:
+        import openvino as ov
+        devs = ov.Core().available_devices
+        if any(d.upper().startswith("NPU") for d in devs) or "NPU" in [d.upper() for d in devs]:
+            print("Using Intel NPU via OpenVINO")
+            return {"backend": "openvino", "ov_device": "NPU"}
+    except Exception:
+        pass
+   
+    print("Using CPU")
+   return {"backend": "torch", "hf_device": -1, "st_device": "cpu"}
 
 
 # -------------------------------------------------
@@ -176,8 +186,25 @@ def load_models(device_hf, device_st):
         "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
         device=device_st,
     )
+   return ner_pipe, embedder
+   
+def load_models_openvino(ov_device: str):
+    from transformers import AutoTokenizer, pipeline
+    from optimum.intel.openvino import OVModelForTokenClassification
 
-    return ner_pipe, embedder
+    model_id = "Davlan/xlm-roberta-base-ner-hrl"
+
+    # This compiles the model for the given OpenVINO device (CPU/GPU/NPU).
+    model = OVModelForTokenClassification.from_pretrained(model_id, device=ov_device)
+    tok = AutoTokenizer.from_pretrained(model_id)
+
+    ner_pipe = pipeline(
+        "token-classification",
+        model=model,
+        tokenizer=tok,
+        aggregation_strategy="simple",
+    )
+   return ner_pipe, embedder
 
 
 # -------------------------------------------------
@@ -270,7 +297,11 @@ def main():
         text = sys.stdin.read()
 
     device_hf, device_st = detect_device()
-    ner_pipe, _ = load_models(device_hf, device_st)
+    if accel["backend"] == "openvino":
+        ner_pipe, _ = load_models_openvino(accel["ov_device"])
+       #ner_pipe, _ = load_models(device_hf, device_st)
+    else:
+        ner_pipe, _ = load_models_torch(accel["hf_device"], accel["st_device"])    
 
     result = mark_pii(text, ner_pipe)
 
