@@ -142,7 +142,7 @@ REGEX_PATTERNS = [
     ("credit_card", re.compile(r"\b(?:\d[ -]*?){13,16}\b"), 4),
     ("iban", re.compile(r"\b[A-Z]{2}\d{2}[A-Z0-9]{11,30}\b"), 5),
 ]
-
+TOKEN_RE = re.compile(r"\b[\w'’-]+\b", re.UNICODE)
 
 # -------------------------------------------------
 # NER label mapping
@@ -208,8 +208,113 @@ def load_models_openvino(ov_device: str):
         tokenizer=tokenizer,
         aggregation_strategy="simple",
     )
-    return ner_pipe, None
+    embedder = SentenceTransformer(
+        "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+        device="cpu",
+    )
+    return ner_pipe, embedder
 
+def load_vocab(vocab_dir: Optional[str]) -> List[Tuple[str, str]]:
+    entries = []
+    if not vocab_dir:
+        return entries
+    if not os.path.isdir(vocab_dir):
+        return entries
+
+    for path in glob.glob(os.path.join(vocab_dir, "*.csv")):
+        df = pd.read_csv(path)
+        if "phrase" not in df.columns or "tag" not in df.columns:
+            continue
+
+        for _, row in df.iterrows():
+            phrase = str(row["phrase"]).strip()
+            tag = str(row["tag"]).strip()
+            if phrase and tag and phrase.lower() != "nan" and tag.lower() != "nan":
+                entries.append((phrase, tag))
+
+    return entries
+
+def build_vocab_index(embedder, vocab_entries: List[Tuple[str, str]]):
+    if not vocab_entries:
+        return {"buckets": {}, "max_words": 0}
+
+    buckets = {}
+    max_words = 0
+
+    for phrase, tag in vocab_entries:
+        n_words = len(TOKEN_RE.findall(phrase))
+        if n_words == 0:
+            continue
+        max_words = max(max_words, n_words)
+        buckets.setdefault(n_words, []).append((phrase, tag))
+
+    out = {}
+    for n_words, items in buckets.items():
+        phrases = [p for p, _ in items]
+        tags = [t for _, t in items]
+
+        embeddings = embedder.encode(
+            phrases,
+            convert_to_numpy=True,
+            normalize_embeddings=True,
+            show_progress_bar=False,
+        )
+
+        out[n_words] = {
+            "phrases": phrases,
+            "tags": tags,
+            "embeddings": embeddings,
+        }
+
+    return {"buckets": out, "max_words": max_words}
+
+def vocab_spans(text, embedder, vocab_index, threshold=0.78):
+    spans = []
+
+    if not embedder or not vocab_index or not vocab_index["buckets"]:
+        return spans
+
+    tokens = list(TOKEN_RE.finditer(text))
+    if not tokens:
+        return spans
+
+    for n_words, bucket in vocab_index["buckets"].items():
+        if len(tokens) < n_words:
+            continue
+
+        candidate_texts = []
+        candidate_positions = []
+
+        for i in range(len(tokens) - n_words + 1):
+            start = tokens[i].start()
+            end = tokens[i + n_words - 1].end()
+            candidate = text[start:end].strip()
+
+            if not candidate:
+                continue
+
+            candidate_texts.append(candidate)
+            candidate_positions.append((start, end))
+
+        if not candidate_texts:
+            continue
+
+        cand_emb = embedder.encode(
+            candidate_texts,
+            convert_to_numpy=True,
+            normalize_embeddings=True,
+            show_progress_bar=False,
+        )
+
+        sims = cand_emb @ bucket["embeddings"].T
+        best_idx = np.argmax(sims, axis=1)
+        best_scores = sims[np.arange(len(candidate_texts)), best_idx]
+
+        for (start, end), score, idx in zip(candidate_positions, best_scores, best_idx):
+            if score >= threshold:
+                spans.append(Span(start, end, bucket["tags"][idx], 3))
+
+    return spans
 
 # -------------------------------------------------
 # Regex detection
@@ -272,10 +377,11 @@ def wrap(text, spans):
 # -------------------------------------------------
 # Main PII detection
 # -------------------------------------------------
-def mark_pii(text, ner_pipe):
+def mark_pii(text, ner_pipe, embedder=None, vocab_index=None, vocab_threshold=0.78):
     spans = []
-    spans.extend(regex_spans(text))
-    spans.extend(ner_spans(ner_pipe, text))
+    spans.extend(regex_spans(text))                         # step 1: regex
+    spans.extend(ner_spans(ner_pipe, text))                # step 2: ner
+    spans.extend(vocab_spans(text, embedder, vocab_index, vocab_threshold))  # step 3: sentencepiece
     spans = resolve(spans)
     return wrap(text, spans)
 
@@ -289,6 +395,8 @@ def main():
     g.add_argument("--text")
     g.add_argument("--in", dest="infile")
     ap.add_argument("--out", dest="outfile")
+    ap.add_argument("--vocab_dir")
+    ap.add_argument("--vocab_threshold", type=float, default=0.78)
 
     args = ap.parse_args()
 
@@ -307,7 +415,17 @@ def main():
     else:
         ner_pipe, _ = load_models(accel["hf_device"], accel["st_device"])
 
-    result = mark_pii(text, ner_pipe)
+    #result = mark_pii(text, ner_pipe)
+    vocab_entries = load_vocab(args.vocab_dir)
+    vocab_index = build_vocab_index(embedder, vocab_entries) if vocab_entries else None
+
+    result = mark_pii(
+        text,
+        ner_pipe,
+        embedder=embedder,
+        vocab_index=vocab_index,
+        vocab_threshold=args.vocab_threshold,
+    )
 
     if args.outfile:
         with open(args.outfile, "w", encoding="utf-8") as f:
