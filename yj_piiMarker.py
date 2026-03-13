@@ -272,15 +272,19 @@ def vocab_spans(text, embedder, vocab_index, threshold=0.78, debug=False, top_k=
     spans = []
 
     if not embedder or not vocab_index or not vocab_index["buckets"]:
+        if debug:
+            print("\n+++ Vocab debug +++")
+            print("No embedder or empty vocab index")
+            print("+++ /Vocab debug +++\n")
         return spans
 
     tokens = list(TOKEN_RE.finditer(text))
     if not tokens:
-       if debug:
-           print("\n+++ Vocab debug +++")
-           print("No tokens found")
-           print("+++ /Vocab debug +++\n")
-       return spans
+        if debug:
+            print("\n+++ Vocab debug +++")
+            print("No tokens found")
+            print("+++ /Vocab debug +++\n")
+        return spans
 
     for n_words, bucket in vocab_index["buckets"].items():
         if len(tokens) < n_words:
@@ -294,11 +298,9 @@ def vocab_spans(text, embedder, vocab_index, threshold=0.78, debug=False, top_k=
             end = tokens[i + n_words - 1].end()
             candidate = text[start:end].strip()
 
-            if not candidate:
-                continue
-
-            candidate_texts.append(candidate)
-            candidate_positions.append((start, end))
+            if candidate:
+                candidate_texts.append(candidate)
+                candidate_positions.append((start, end))
 
         if not candidate_texts:
             continue
@@ -328,12 +330,12 @@ def vocab_spans(text, embedder, vocab_index, threshold=0.78, debug=False, top_k=
                         f"tag='{bucket['tags'][idx]}'"
                     )
 
-            best_idx = np.argmax(sims, axis=1)
-            best_scores = sims[np.arange(len(candidate_texts)), best_idx]
-
+            best_idx = top_ids[0]
+            best_score = row[best_idx]
 #        for (start, end), score, idx in zip(candidate_positions, best_scores, best_idx):
 #            if score >= threshold:
 #                spans.append(Span(start, end, bucket["tags"][idx], 3))
+
             if best_score >= threshold:
                 spans.append(Span(start, end, bucket["tags"][best_idx], 3))
                 if debug:
