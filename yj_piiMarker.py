@@ -194,7 +194,6 @@ def load_models_openvino(ov_device: str):
 
     model_id = "Davlan/xlm-roberta-base-ner-hrl"
 
-    # This compiles the model for the given OpenVINO device (CPU/GPU/NPU).
     model = OVModelForTokenClassification.from_pretrained(model_id, device=ov_device)
     tok = AutoTokenizer.from_pretrained(model_id)
 
@@ -204,7 +203,7 @@ def load_models_openvino(ov_device: str):
         tokenizer=tok,
         aggregation_strategy="simple",
     )
-    return ner_pipe, embedder
+    return ner_pipe, None
 
 
 # -------------------------------------------------
@@ -296,12 +295,12 @@ def main():
     else:
         text = sys.stdin.read()
 
-    device_hf, device_st = detect_device()
+    accel = detect_device()
+
     if accel["backend"] == "openvino":
         ner_pipe, _ = load_models_openvino(accel["ov_device"])
-       #ner_pipe, _ = load_models(device_hf, device_st)
     else:
-        ner_pipe, _ = load_models_torch(accel["hf_device"], accel["st_device"])    
+        ner_pipe, _ = load_models(accel["hf_device"], accel["st_device"])
 
     result = mark_pii(text, ner_pipe)
 
@@ -310,7 +309,6 @@ def main():
             f.write(result)
     else:
         print(result)
-
 
 if __name__ == "__main__":
     main()
