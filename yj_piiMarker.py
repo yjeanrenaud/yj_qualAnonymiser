@@ -64,20 +64,23 @@ Notes:
 - "phrase" is matched by embedding similarity (robust to minor variations).
 - You can include multiple languages in the same vocab.
 
-# Usage #
-# Direct text from cli
-python pii_marker_multilingual.py --text "I live in New York and my email is test@example.com"
+# Usage 
+## Direct text from cli
+python3 yj_piiMarker.py --text "I am Jacqueline, called Jackie. I live in New York and you may reach my via test@example.com"
 
-# File operations
-python pii_marker_multilingual.py --in transcript.txt --out marked.txt
+## File operations
+python3 yj_piiMarker.py --in transcript.txt --out marked.txt
 
-# Stdi/o
-cat transcript.txt | python pii_marker_multilingual.py > marked.txt
+## Stdi/o
+cat transcript.txt | python3 yj_piiMarker.py > marked.txt
 
-# With custom vocab folder
-python pii_marker_multilingual.py --in transcript.txt --vocab_dir vocab --out marked.txt
+## With custom vocab folder
+python3 yj_piiMarker.py --in transcript.txt --vocab_dir vocab --out marked.txt
 
-# Tuning #
+## Debugging output
+python3 yj_piiMarker.py --text "I am Jacqueline, called Jackie. I live in New York and you may reach me via test@example.com" --debug
+
+# Tuning 
 Key thresholds:
   --vocab_threshold   default 0.78  (higher is stricter)
   --proto_threshold   default 0.70  (higher is stricter)
@@ -89,7 +92,7 @@ If you miss things:
   decrease thresholds (e.g., 0.72 / 0.65)
 
 # DISCLAIMER # 
-No automated PII detection is perfect. Always review redactions before sharing externally.
+No automated PII detection is perfect. Always review redactions before using it, especially when sharing the results.
 """
 
 import argparse
