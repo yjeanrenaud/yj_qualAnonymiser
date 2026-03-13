@@ -268,7 +268,7 @@ def build_vocab_index(embedder, vocab_entries: List[Tuple[str, str]]):
 
     return {"buckets": out, "max_words": max_words}
 
-def vocab_spans(text, embedder, vocab_index, threshold=0.78):
+def vocab_spans(text, embedder, vocab_index, threshold=0.78, debug=False, top_k=3):
     spans = []
 
     if not embedder or not vocab_index or not vocab_index["buckets"]:
@@ -276,7 +276,11 @@ def vocab_spans(text, embedder, vocab_index, threshold=0.78):
 
     tokens = list(TOKEN_RE.finditer(text))
     if not tokens:
-        return spans
+       if debug:
+           print("\n=== Vocab debug ===")
+           print("No tokens found")
+           print("=== /Vocab debug ===\n")
+    return spans
 
     for n_words, bucket in vocab_index["buckets"].items():
         if len(tokens) < n_words:
@@ -307,6 +311,10 @@ def vocab_spans(text, embedder, vocab_index, threshold=0.78):
         )
 
         sims = cand_emb @ bucket["embeddings"].T
+
+        if debug:
+            print(f"\n+++ Vocab bucket: n_words={n_words}, vocab_items={len(bucket['phrases'])}, candidates={len(candidate_texts)} +++")
+
         for row_idx, ((start, end), candidate) in enumerate(zip(candidate_positions, candidate_texts)):
             row = sims[row_idx]
             top_ids = np.argsort(-row)[:top_k]
@@ -331,10 +339,10 @@ def vocab_spans(text, embedder, vocab_index, threshold=0.78):
                 if debug:
                     print("  -> ACCEPTED")
             elif debug:
-                print("  -> rejected")?
+                print("  -> rejected")
 
-        if debug:
-           print(f"\nDEBUG bucket: n_words={n_words}, vocab_items={len(bucket['phrases'])}, candidates={len(candidate_texts)}")
+    if debug:
+        print("\n+++ /Vocab debug +++\n")
 
     return spans
 
@@ -352,17 +360,21 @@ def regex_spans(text):
 # -------------------------------------------------
 # NER detection
 # -------------------------------------------------
-def ner_spans(pipe, text):
+def ner_spans(pipe, text, debug=False):
     spans = []
+    ents = pipe(text)
 
-    for ent in pipe(text):
+    if debug:
+        print("\n+++ NER raw +++")
+        for ent in ents:
+            print(ent)
+        print("+++ /NER raw +++\n")
+
+    for ent in ents:
         label = ent.get("entity_group", "")
         tag = NER_LABEL_MAP.get(label)
         start = ent.get("start")
         end = ent.get("end")
-        if debug:
-            ents = pipe(text)
-            print("++debug##\nNER raw: ", ents, "\n++debug++\n\n")
 
         if tag and start is not None and end is not None and end > start:
             spans.append(Span(start, end, tag, 2))
@@ -433,11 +445,11 @@ def debug_pair_scores(embedder, queries, vocab_phrases):
 # -------------------------------------------------
 # Main PII detection
 # -------------------------------------------------
-def mark_pii(text, ner_pipe, embedder=None, vocab_index=None, vocab_threshold=0.78):
+def mark_pii(text, ner_pipe, embedder=None, vocab_index=None, vocab_threshold=0.78, debug=False):
     spans = []
     spans.extend(regex_spans(text))                         # step 1: regex
-    spans.extend(ner_spans(ner_pipe, text))                # step 2: ner
-    spans.extend(vocab_spans(text, embedder, vocab_index, vocab_threshold))  # step 3: sentence-transformer vocab similarity 
+    spans.extend(ner_spans(ner_pipe, text, debug=debug))                # step 2: ner
+    spans.extend(vocab_spans(text, embedder, vocab_index, vocab_threshold, debug=debug))  # step 3: sentence-transformer vocab similarity 
     spans = resolve(spans)
     return wrap(text, spans)
 
@@ -453,7 +465,7 @@ def main():
     ap.add_argument("--out", dest="outfile")
     ap.add_argument("--vocab_dir")
     ap.add_argument("--vocab_threshold", type=float, default=0.78)
-    ap.add_argument("--debug")
+    ap.add_argument("--debug", action="store_true", help="Print NER and vocab similarity debug output")
 
     args = ap.parse_args()
 
@@ -482,6 +494,7 @@ def main():
         embedder=embedder,
         vocab_index=vocab_index,
         vocab_threshold=args.vocab_threshold,
+        debug=args.debug,
     )
 
     if args.outfile:
