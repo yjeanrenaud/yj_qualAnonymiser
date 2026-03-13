@@ -16,6 +16,7 @@ A partial attempt to use NLP to classify word embeddings in texts, primarily in 
 - [Usage](#usage)
 - [Todo](#todo)
 - [License and Citation](#license-and-citation)
+
 --
 ## Why?
 
