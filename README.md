@@ -28,6 +28,8 @@ I aim to support as many languages as possible. With the initial version of the 
 
 If neither CUDA nor Apple MPS are available, it automatically falls back to CPU. The latter is slower but still usable.
 
+I added support for the new Intel CPUs with dedicated NPU. This might bring some performance boosts, too.
+
 ## What for?
 
 I plan to include this in [noScribe](https://github.com/kaixxx/noScribe), my workhorse for automated offline interview transcription in my daytime job as a social scientist.
@@ -35,7 +37,8 @@ If you're interested in my progress integrating this into noScribe, [check out m
 
 ## Todo
 
-Add support for the new Intel CPUs with dedicated NPU. This might bring some performance boosts, too.
+- hardening
+- portability
 
 ## License and Citation
 
