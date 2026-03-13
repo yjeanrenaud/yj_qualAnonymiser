@@ -176,7 +176,7 @@ class Span:
 def load_models(device_hf, device_st):
     model_id = "Davlan/xlm-roberta-base-ner-hrl"
 
-    tokenizer = AutoTokenizer.from_pretrained(model_id, use_fast=False)
+    tokenizer = AutoTokenizer.from_pretrained(model_id, use_fast=True)
     model = AutoModelForTokenClassification.from_pretrained(model_id)
 
     ner_pipe = pipeline(
@@ -200,7 +200,7 @@ def load_models_openvino(ov_device: str):
     model_id = "Davlan/xlm-roberta-base-ner-hrl"
 
     model = OVModelForTokenClassification.from_pretrained(model_id, device=ov_device)
-    tokenizer = AutoTokenizer.from_pretrained(model_id, use_fast=False)
+    tokenizer = AutoTokenizer.from_pretrained(model_id, use_fast=True)
 
     ner_pipe = pipeline(
         "token-classification",
@@ -307,12 +307,34 @@ def vocab_spans(text, embedder, vocab_index, threshold=0.78):
         )
 
         sims = cand_emb @ bucket["embeddings"].T
-        best_idx = np.argmax(sims, axis=1)
-        best_scores = sims[np.arange(len(candidate_texts)), best_idx]
+        for row_idx, ((start, end), candidate) in enumerate(zip(candidate_positions, candidate_texts)):
+            row = sims[row_idx]
+            top_ids = np.argsort(-row)[:top_k]
 
-        for (start, end), score, idx in zip(candidate_positions, best_scores, best_idx):
-            if score >= threshold:
-                spans.append(Span(start, end, bucket["tags"][idx], 3))
+            if debug:
+                print(f"\nDEBUG candidate: '{candidate}' [{start}:{end}]")
+                for rank, idx in enumerate(top_ids, start=1):
+                    print(
+                        f"  #{rank} score={row[idx]:.4f} "
+                        f"phrase='{bucket['phrases'][idx]}' "
+                        f"tag='{bucket['tags'][idx]}'"
+                    )
+
+            best_idx = np.argmax(sims, axis=1)
+            best_scores = sims[np.arange(len(candidate_texts)), best_idx]
+
+#        for (start, end), score, idx in zip(candidate_positions, best_scores, best_idx):
+#            if score >= threshold:
+#                spans.append(Span(start, end, bucket["tags"][idx], 3))
+            if best_score >= threshold:
+                spans.append(Span(start, end, bucket["tags"][best_idx], 3))
+                if debug:
+                    print("  -> ACCEPTED")
+            elif debug:
+                print("  -> rejected")?
+
+        if debug:
+           print(f"\nDEBUG bucket: n_words={n_words}, vocab_items={len(bucket['phrases'])}, candidates={len(candidate_texts)}")
 
     return spans
 
@@ -332,11 +354,15 @@ def regex_spans(text):
 # -------------------------------------------------
 def ner_spans(pipe, text):
     spans = []
+
     for ent in pipe(text):
         label = ent.get("entity_group", "")
         tag = NER_LABEL_MAP.get(label)
         start = ent.get("start")
         end = ent.get("end")
+        if debug:
+            ents = pipe(text)
+            print("++debug##\nNER raw: ", ents, "\n++debug++\n\n")
 
         if tag and start is not None and end is not None and end > start:
             spans.append(Span(start, end, tag, 2))
@@ -379,7 +405,30 @@ def wrap(text, spans):
         cursor = s.end
     out.append(text[cursor:])
     return "".join(out)
+# ------------------------------------------------- 
+# debug helper
+# ------------------------------------------------- 
+def debug_pair_scores(embedder, queries, vocab_phrases):
+    q = embedder.encode(
+        queries,
+        convert_to_numpy=True,
+        normalize_embeddings=True,
+        show_progress_bar=False,
+    )
+    v = embedder.encode(
+        vocab_phrases,
+        convert_to_numpy=True,
+        normalize_embeddings=True,
+        show_progress_bar=False,
+    )
 
+    sims = q @ v.T
+
+    for i, query in enumerate(queries):
+        print(f"\nQUERY: {query}")
+        order = np.argsort(-sims[i])
+        for j in order[:5]:
+            print(f"  score={sims[i, j]:.4f}  vocab='{vocab_phrases[j]}'")
 
 # -------------------------------------------------
 # Main PII detection
@@ -404,6 +453,7 @@ def main():
     ap.add_argument("--out", dest="outfile")
     ap.add_argument("--vocab_dir")
     ap.add_argument("--vocab_threshold", type=float, default=0.78)
+    ap.add_argument("--debug")
 
     args = ap.parse_args()
 
