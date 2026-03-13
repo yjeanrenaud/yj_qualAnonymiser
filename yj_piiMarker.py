@@ -411,9 +411,9 @@ def main():
     accel = detect_device()
 
     if accel["backend"] == "openvino":
-        ner_pipe, _ = load_models_openvino(accel["ov_device"])
+        ner_pipe, embedder = load_models_openvino(accel["ov_device"])
     else:
-        ner_pipe, _ = load_models(accel["hf_device"], accel["st_device"])
+        ner_pipe, embedder = load_models(accel["hf_device"], accel["st_device"])
 
     #result = mark_pii(text, ner_pipe)
     vocab_entries = load_vocab(args.vocab_dir)
