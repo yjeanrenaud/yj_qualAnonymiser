@@ -1,0 +1,10 @@
+# virtual envs
+.venv/
+venv/
+
+# python
+__pycache__/
+*.py[cod]
+
+# local secrets/config
+.env
