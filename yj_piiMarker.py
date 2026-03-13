@@ -104,9 +104,8 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 import torch
-from transformers import pipeline
+from transformers import AutoModelForTokenClassification, AutoTokenizer, pipeline
 from sentence_transformers import SentenceTransformer
-
 
 # -------------------------------------------------
 # Automatic device detection
@@ -175,9 +174,15 @@ class Span:
 # Model loading
 # -------------------------------------------------
 def load_models(device_hf, device_st):
+    model_id = "Davlan/xlm-roberta-base-ner-hrl"
+
+    tokenizer = AutoTokenizer.from_pretrained(model_id, use_fast=False)
+    model = AutoModelForTokenClassification.from_pretrained(model_id)
+
     ner_pipe = pipeline(
         "token-classification",
-        model="Davlan/xlm-roberta-base-ner-hrl",
+        model=model,
+        tokenizer=tokenizer,
         aggregation_strategy="simple",
         device=device_hf,
     )
@@ -195,12 +200,12 @@ def load_models_openvino(ov_device: str):
     model_id = "Davlan/xlm-roberta-base-ner-hrl"
 
     model = OVModelForTokenClassification.from_pretrained(model_id, device=ov_device)
-    tok = AutoTokenizer.from_pretrained(model_id)
+    tokenizer = AutoTokenizer.from_pretrained(model_id, use_fast=False)
 
     ner_pipe = pipeline(
         "token-classification",
         model=model,
-        tokenizer=tok,
+        tokenizer=tokenizer,
         aggregation_strategy="simple",
     )
     return ner_pipe, None
