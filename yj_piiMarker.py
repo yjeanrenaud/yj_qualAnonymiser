@@ -349,11 +349,33 @@ def vocab_spans(text, embedder, vocab_index, threshold=0.78, debug=False, top_k=
 # -------------------------------------------------
 # Regex detection
 # -------------------------------------------------
-def regex_spans(text):
+def regex_spans(text, debug=False):
     spans = []
+
+    if debug:
+        print("\n+++ Regex raw +++")
+        print(text)
+        print("+++ /Regex raw +++\n")
+
     for tag, pat, pr in REGEX_PATTERNS:
-        for m in pat.finditer(text):
-            spans.append(Span(m.start(), m.end(), tag, pr))
+        matches = list(pat.finditer(text))
+
+        if debug:
+            print(f"Regex pattern '{tag}': {len(matches)} match(es)")
+
+        for m in matches:
+            span = Span(m.start(), m.end(), tag, pr)
+            spans.append(span)
+
+            if debug:
+                print(
+                    f"  [{m.start()}:{m.end()}] "
+                    f"'{text[m.start():m.end()]}' -> tag='{tag}', priority={pr}"
+                )
+
+    if debug:
+        print("+++ /Regex matches +++\n")
+
     return spans
 
 
@@ -447,7 +469,7 @@ def debug_pair_scores(embedder, queries, vocab_phrases):
 # -------------------------------------------------
 def mark_pii(text, ner_pipe, embedder=None, vocab_index=None, vocab_threshold=0.78, debug=False):
     spans = []
-    spans.extend(regex_spans(text))                         # step 1: regex
+    spans.extend(regex_spans(text, debug=debug))                         # step 1: regex
     spans.extend(ner_spans(ner_pipe, text, debug=debug))                # step 2: ner
     spans.extend(vocab_spans(text, embedder, vocab_index, vocab_threshold, debug=debug))  # step 3: sentence-transformer vocab similarity 
     spans = resolve(spans)
