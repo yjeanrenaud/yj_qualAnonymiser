@@ -119,7 +119,7 @@ def detect_device():
     if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
         print("Using Apple MPS acceleration")
         return {"backend": "torch", "hf_device": 0, "st_device": "mps"}
-   try:
+    try:
         import openvino as ov
         devs = ov.Core().available_devices
         if any(d.upper().startswith("NPU") for d in devs) or "NPU" in [d.upper() for d in devs]:
@@ -129,7 +129,7 @@ def detect_device():
         pass
    
     print("Using CPU")
-   return {"backend": "torch", "hf_device": -1, "st_device": "cpu"}
+    return {"backend": "torch", "hf_device": -1, "st_device": "cpu"}
 
 
 # -------------------------------------------------
@@ -186,7 +186,7 @@ def load_models(device_hf, device_st):
         "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
         device=device_st,
     )
-   return ner_pipe, embedder
+    return ner_pipe, embedder
    
 def load_models_openvino(ov_device: str):
     from transformers import AutoTokenizer, pipeline
@@ -204,7 +204,7 @@ def load_models_openvino(ov_device: str):
         tokenizer=tok,
         aggregation_strategy="simple",
     )
-   return ner_pipe, embedder
+    return ner_pipe, embedder
 
 
 # -------------------------------------------------
