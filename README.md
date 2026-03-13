@@ -17,7 +17,6 @@ A partial attempt to use NLP to classify word embeddings in texts, primarily in 
 - [Todo](#todo)
 - [License and Citation](#license-and-citation)
 
---
 ## Why?
 
 Pseudonymisation or anonymisation of *Personally Identifiable Information* (PII) is more than pure redaction. For social scientists like me, it is important to preserve certain information or categorical epistemological context while still protecting informants in empirical qualitative social science research.
