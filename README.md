@@ -72,6 +72,7 @@ If you're interested in my progress integrating this into noScribe, [check out m
 10. *Optional but recommended*: Intel NPU
     
     These co-processors (technically wrong, I know) are included in newer CPUs from Intel. I think it was since the first Intel Core Ultra Series (Meteor Lake), hence 2023. So if your Computer is Intel Based and newer, this is a good option (even though proprietary blobs are required)
+    
    `pip install -U "optimum-intel[openvino]" openvino`
 
 ### Custom Vocab CSV format
