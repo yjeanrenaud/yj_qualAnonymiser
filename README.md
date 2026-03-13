@@ -1,7 +1,22 @@
 # yj_qualAnonymiser
 
 A partial attempt to use NLP to classify word embeddings in texts, primarily in narrative interviews from qualitative social sciences, to make meaningful suggestions for anonymisation / pseudonymisation. It runs completely locally and offline.
+--
+## Table of Contents
 
+- [Why?](#why)
+- [How?](#how)
+  - [NER and Word Embedding Similarity](#ner-and-word-embedding-similarity)
+  - [Regex and Vocabulary Lists](#regex-and-vocabulary-lists)
+  - [Multilingual](#multilingual)
+  - [Optional GPU and NPU Acceleration](#optional-gpu-and-npu-acceleration)
+- [What for?](#what-for)
+- [Installation](#installation)
+  - [Custom Vocab CSV format](#custom-vocab-csv-format)
+- [Usage](#usage)
+- [Todo](#todo)
+- [License and Citation](#license-and-citation)
+--
 ## Why?
 
 Pseudonymisation or anonymisation of *Personally Identifiable Information* (PII) is more than pure redaction. For social scientists like me, it is important to preserve certain information or categorical epistemological context while still protecting informants in empirical qualitative social science research.
@@ -129,4 +144,5 @@ This work is licensed under the AGPL-3. Hence, it's open source.
 If you use this software in academic work, please cite:
 
 Jeanrenaud, Yves (2026). *yj_qualAnonymiser*. https://github.com/yjeanrenaud/yj_qualAnonymiser/.
+
 
