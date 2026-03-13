@@ -335,10 +335,12 @@ def ner_spans(pipe, text):
     for ent in pipe(text):
         label = ent.get("entity_group", "")
         tag = NER_LABEL_MAP.get(label)
-        if tag:
-            spans.append(
-                Span(ent["start"], ent["end"], tag, 2)
-            )
+        start = ent.get("start")
+        end = ent.get("end")
+
+        if tag and start is not None and end is not None and end > start:
+            spans.append(Span(start, end, tag, 2))
+
     return spans
 
 
@@ -346,6 +348,11 @@ def ner_spans(pipe, text):
 # Resolve overlaps
 # -------------------------------------------------
 def resolve(spans):
+    spans = [
+        s for s in spans
+        if s.start is not None and s.end is not None and s.end > s.start
+    ]
+
     spans = sorted(spans, key=lambda s: (s.start, -s.priority, -s.length()))
     out = []
 
@@ -381,7 +388,7 @@ def mark_pii(text, ner_pipe, embedder=None, vocab_index=None, vocab_threshold=0.
     spans = []
     spans.extend(regex_spans(text))                         # step 1: regex
     spans.extend(ner_spans(ner_pipe, text))                # step 2: ner
-    spans.extend(vocab_spans(text, embedder, vocab_index, vocab_threshold))  # step 3: sentencepiece
+    spans.extend(vocab_spans(text, embedder, vocab_index, vocab_threshold))  # step 3: sentence-transformer vocab similarity 
     spans = resolve(spans)
     return wrap(text, spans)
 
