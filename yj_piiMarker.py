@@ -277,10 +277,10 @@ def vocab_spans(text, embedder, vocab_index, threshold=0.78, debug=False, top_k=
     tokens = list(TOKEN_RE.finditer(text))
     if not tokens:
        if debug:
-           print("\n=== Vocab debug ===")
+           print("\n+++ Vocab debug +++")
            print("No tokens found")
-           print("=== /Vocab debug ===\n")
-    return spans
+           print("+++ /Vocab debug +++\n")
+       return spans
 
     for n_words, bucket in vocab_index["buckets"].items():
         if len(tokens) < n_words:
