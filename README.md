@@ -60,6 +60,7 @@ If you're interested in my progress integrating this into noScribe, [check out m
 2. Install core deps
    
    `pip install -U transformers torch sentence-transformers pandas numpy`
+   
    OR use
    
    `pip install -r requirements.txt`
