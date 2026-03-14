@@ -35,7 +35,7 @@ As a next step, I also use traditional regex patterns (for email/phone/etc.) and
 
 ### Multilingual
 
-I aim to support as many languages as possible. With the initial version of the Python script, I tested English, German, and French transcripts across various cases, and results look promising. (*help me with testing further languages, too*)
+I aim to support as many languages as possible. With the initial version of the Python script, I tested English, German, and French transcripts across various cases, and results look promising. The NER is capable of Arabic and Chinese as well as Spanish and Italian etc.*help me with testing further languages, too*
 
 ### (Optional) GPU and NPU Acceleration
 
@@ -43,7 +43,7 @@ I aim to support as many languages as possible. With the initial version of the 
 
 If neither CUDA nor Apple MPS are available, it automatically falls back to CPU. The latter is slower but still usable.
 
-I added support for the new Intel CPUs with dedicated NPU. This might bring some performance boosts, too.
+I added support for the new Intel CPUs with dedicated NPU. This might bring some performance boosts, too. unfortunately, my CPU is currently not supported by `openvino`.
 
 ## What for?
 
@@ -59,7 +59,10 @@ If you're interested in my progress integrating this into noScribe, [check out m
    ```
 2. Install core deps
    
-   `pip install -U transformers torch sentence-transformers pandas numpy`   
+   `pip install -U transformers torch sentence-transformers pandas numpy`
+   OR use
+   
+   `pip install -r requirements.txt`
 4. *Optional*: faster CPU inference (may or may not be available on your platform)
    
    `pip install -U accelerate`
