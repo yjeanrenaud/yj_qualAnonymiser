@@ -40,7 +40,7 @@ nvidia-nccl-cu12==2.27.5
 nvidia-nvjitlink-cu12==12.8.93
 nvidia-nvshmem-cu12==3.4.5
 nvidia-nvtx-cu12==12.8.90
-onnx==1.20.1
+onnx==1.21.0
 openvino==2026.0.0
 openvino-telemetry==2025.2.0
 openvino-tokenizers==2026.0.0.0
