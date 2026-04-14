@@ -1,6 +1,6 @@
 # yj_qualAnonymiser
 
-A partial attempt to use NLP to classify word embeddings in texts, primarily in narrative interviews from qualitative social sciences, to make meaningful suggestions for anonymisation / pseudonymisation. It runs completely locally and offline.
+A partical attempt to use NLP to classify word embeddings in texts, primarily in narrative interviews from qualitative social sciences, to make meaningful suggestions for anonymisation / pseudonymisation. It runs completely locally and offline.
 --
 ## Table of Contents
 
