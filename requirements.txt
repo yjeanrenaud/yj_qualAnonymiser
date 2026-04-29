@@ -49,7 +49,8 @@ optimum-intel==1.27.0
 optimum-onnx==0.1.0
 packaging==26.0
 pandas==2.3.3
-protobuf>=5.0,<7.0.0
+protobuf==7.34.0  ; platform_system == "Linux"
+protobuf>=5.0,<7.0.0  ; platform_system == "Windows"
 psutil==7.2.2
 pydot==3.0.4
 Pygments==2.20.0
@@ -74,8 +75,10 @@ threadpoolctl==3.6.0
 tokenizers==0.22.2
 torch==2.10.0
 tqdm==4.67.3
-transformers>=4.45,<4.58
+transformers == 5.7.0 ; platform_system == "Linux"
+transformers>=4.45,<4.58 ; platform_system == "Windows"
 triton==3.6.0 ; platform_system == "Linux"
+triton-windows==3.6.0 ; platform_system == "Windows"
 typer==0.24.1
 typing_extensions==4.15.0
 tzdata==2025.3
