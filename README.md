@@ -110,6 +110,9 @@ Notes on vocabolaries:
 - You can include multiple languages in the same vocab file.
 - Tis feature is ment for words and expressions that might be very, very rare, very field specific or something you expect to occure in your material.
 
+Notes on packages:
+- Under Windows, some Python packages are unavailable, untable or not working as intended. Hence, they might be outdated in the [requirements.txt]. e.g. `transformers` is older than Version 5.5.0 and vunerable. Take mitigation measures, e.g. chroot or VM.
+
 ## Usage
 - basic test ifthe mechanism works (and downloading the models for the first run (around 3 GiB)
 - ```python3 yj_piiMarker.py --text "Marcelle was my grandmother. She lived in Lausanne, a city in Switzerland, and also knew the Rüdisühlis. where I would visit her in from time to time as a child. Although she passed away about 35 years ago, I still remember her and her husband quite vividly." --vocab_dir vocab --debug```
