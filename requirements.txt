@@ -1,4 +1,4 @@
-accelerate==1.13.0
+accelerate==1.15.0
 annotated-doc==0.0.4
 anyio==4.12.1
 certifi==2026.2.25
